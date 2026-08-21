@@ -332,3 +332,36 @@ ACL behavior is verified by testing both permitted and restricted traffic betwee
 
 Screenshots and verification results can be added to the `screenshots/` directory as testing is documented.
 
+## Configuration Files
+
+The complete configurations for the network devices are provided in the [`configs/`](configs/) directory.
+
+| Device | Role                | Configuration                  |
+| ------ | ------------------- | ------------------------------ |
+| R1     | Edge Router         | [`R1.txt`](configs/R1.txt)     |
+| CSW1   | Core Switch         | [`CSW1.txt`](configs/CSW1.txt) |
+| CSW2   | Core Switch         | [`CSW2.txt`](configs/CSW2.txt) |
+| DSW1   | Distribution Switch | [`DSW1.txt`](configs/DSW1.txt) |
+| DSW2   | Distribution Switch | [`DSW2.txt`](configs/DSW2.txt) |
+| ASW1   | Access Switch       | [`ASW1.txt`](configs/ASW1.txt) |
+| ASW2   | Access Switch       | [`ASW2.txt`](configs/ASW2.txt) |
+
+These files contain the device configurations used to implement the network described in this documentation.
+
+## Lessons Learned
+
+This project provided practical experience in designing and implementing a redundant enterprise campus network in a virtualized environment.
+
+Key concepts demonstrated include:
+
+* Designing a hierarchical three-tier network architecture.
+* Implementing dynamic routing with OSPF.
+* Providing gateway redundancy using HSRP.
+* Using EtherChannel and STP to improve Layer 2 availability and control.
+* Segmenting network traffic using VLANs.
+* Implementing centralized DHCP and NAT/PAT services.
+* Applying ACLs to control inter-VLAN communication.
+* Implementing Layer 2 security mechanisms to protect access ports and DHCP/ARP operations.
+* Managing network devices securely through restricted SSH access.
+* Verifying network behavior through routing, connectivity, redundancy, and security tests.
+
