@@ -261,76 +261,294 @@ The complete device configurations are available in the [`configs/`](configs/) d
 
 ## Verification and Testing
 
-The implemented network is verified through connectivity, routing, redundancy, network service, and security checks.
+The implemented network was verified through routing, redundancy, Layer 2 operation, network services, connectivity, and security tests.
 
-### Connectivity
+### OSPF
 
-Connectivity between end devices and their default gateways is tested using ICMP ping.
-
-### Routing
-
-OSPF operation and route propagation are verified using:
+OSPF neighbor formation and route propagation were verified on R1, CSW1, CSW2, DSW1, and DSW2.
 
 ```text
 show ip ospf neighbor
 show ip route
-```
+````
+
+All expected OSPF adjacencies reached the `FULL` state, and internal networks were successfully learned through OSPF.
+
+![R1 OSPF Neighbors](screenshots/ospf/R1-ospf-neighbors.png)
+
+![CSW1 OSPF Neighbors](screenshots/ospf/CSW1-ospf-neighbors.png)
+
+<details>
+<summary>View OSPF routing table evidence</summary>
+
+![R1 Routing Table](screenshots/ospf/R1-routing-table.png)
+
+![CSW1 Routing Table](screenshots/ospf/CSW1-routing-table.png)
+
+![CSW2 Routing Table](screenshots/ospf/CSW2-routing-table.png)
+
+![DSW1 Routing Table](screenshots/ospf/DSW1-routing-table.png)
+
+![DSW2 Routing Table](screenshots/ospf/DSW2-routing-table.png)
+
+</details>
 
 ### HSRP
 
-Gateway redundancy is verified using:
+HSRP gateway redundancy was verified on DSW1 and DSW2.
 
 ```text
-show standby
+show standby brief
 ```
 
-This confirms the active and standby HSRP roles for each VLAN.
+| VLAN | Virtual Gateway | Active Switch |
+| ---: | --------------- | ------------- |
+|   10 | 10.0.10.1       | DSW1          |
+|   20 | 10.0.20.1       | DSW2          |
+|   30 | 10.0.30.1       | DSW1          |
+|   99 | 10.0.2.17       | DSW2          |
 
-### EtherChannel and STP
+![DSW1 HSRP Status](screenshots/hsrp/DSW1-hsrp-status.png)
 
-Link aggregation and Layer 2 topology are verified using:
+![DSW2 HSRP Status](screenshots/hsrp/DSW2-hsrp-status.png)
+
+### EtherChannel
+
+LACP EtherChannel operation was verified on the core and distribution switches.
 
 ```text
 show etherchannel summary
+```
+
+Both EtherChannels were operational with their configured member links successfully bundled.
+
+* CSW1 ↔ CSW2 — Layer 3 LACP EtherChannel
+* DSW1 ↔ DSW2 — Layer 2 LACP EtherChannel
+
+![CSW1 EtherChannel Status](screenshots/etherchannel/CSW1-etherchannel-status.png)
+
+![DSW1 EtherChannel Status](screenshots/etherchannel/DSW1-etherchannel-status.png)
+
+<details>
+<summary>View CSW2 and DSW2 evidence</summary>
+
+![CSW2 EtherChannel Status](screenshots/etherchannel/CSW2-etherchannel-status.png)
+
+![DSW2 EtherChannel Status](screenshots/etherchannel/DSW2-etherchannel-status.png)
+
+</details>
+
+### Spanning Tree
+
+Rapid-PVST operation and STP root distribution were verified on DSW1 and DSW2.
+
+```text
 show spanning-tree
 ```
 
+| VLAN | STP Root |
+| ---: | -------- |
+|   10 | DSW1     |
+|   20 | DSW2     |
+|   30 | DSW1     |
+|   99 | DSW2     |
+
+The STP root distribution aligns with the HSRP active gateway distribution.
+
+![DSW1 STP VLAN 10 and 20](screenshots/spanning-tree/DSW1-stp-vlan10-20.png)
+
+![DSW2 STP VLAN 10 and 20](screenshots/spanning-tree/DSW2-stp-vlan10-20.png)
+
+<details>
+<summary>View additional STP evidence</summary>
+
+![DSW1 STP VLAN 30 and 99](screenshots/spanning-tree/DSW1-stp-vlan30-99.png)
+
+![DSW2 STP VLAN 30 and 99](screenshots/spanning-tree/DSW2-stp-vlan30-99.png)
+
+</details>
+
 ### VLAN and Trunking
 
-VLAN membership and trunk operation are verified using:
+VLAN membership and trunk operation were verified on the access and distribution switches.
 
 ```text
 show vlan brief
 show interfaces trunk
 ```
 
-### DHCP and NAT
+VLANs 10, 20, 30, and 99 were active and carried across the required 802.1Q trunk links. VLAN 999 was configured as the native VLAN.
 
-DHCP address allocation is verified using:
+![ASW1 VLAN Status](screenshots/vlan/ASW1-vlan-status.png)
+
+![ASW1 Trunk Status](screenshots/vlan/ASW1-trunk-status.png)
+
+<details>
+<summary>View additional VLAN and trunk evidence</summary>
+
+![ASW2 VLAN Status](screenshots/vlan/ASW2-vlan-status.png)
+
+![ASW2 Trunk Status](screenshots/vlan/ASW2-trunk-status.png)
+
+![DSW1 VLAN Status](screenshots/vlan/DSW1-vlan-status.png)
+
+![DSW1 Trunk Status](screenshots/vlan/DSW1-trunk-status.png)
+
+![DSW2 VLAN Status](screenshots/vlan/DSW2-vlan-status.png)
+
+![DSW2 Trunk Status](screenshots/vlan/DSW2-trunk-status.png)
+
+</details>
+
+### DHCP
+
+DHCP operation was verified through R1's DHCP bindings and the network configuration of PC1–PC4.
 
 ```text
 show ip dhcp binding
 ```
 
-NAT operation is verified using:
+| Device | VLAN | Assigned Address |
+| ------ | ---: | ---------------- |
+| PC1    |   10 | 10.0.10.11       |
+| PC2    |   20 | 10.0.20.11       |
+| PC3    |   10 | 10.0.10.12       |
+| PC4    |   30 | 10.0.30.11       |
+
+All four end devices received addresses from their assigned VLAN networks.
+
+![R1 DHCP Bindings](screenshots/dhcp/R1-dhcp-bindings.png)
+
+<details>
+<summary>View end-device DHCP evidence</summary>
+
+![PC1 DHCP Address](screenshots/dhcp/PC1-dhcp-address.png)
+
+![PC2 DHCP Address](screenshots/dhcp/PC2-dhcp-address.png)
+
+![PC3 DHCP Address](screenshots/dhcp/PC3-dhcp-address.png)
+
+![PC4 DHCP Address](screenshots/dhcp/PC4-dhcp-address.png)
+
+</details>
+
+### NAT and Internet Connectivity
+
+Internet connectivity was tested from all four end devices using ICMP.
+
+```text
+ping -c 3 8.8.8.8
+```
+
+All four devices successfully reached `8.8.8.8` with 0% packet loss.
+
+NAT operation was verified on R1 using:
 
 ```text
 show ip nat translations
 ```
 
-### Security
+The translations confirmed that internal client addresses were translated to the R1 external address.
 
-Layer 2 security mechanisms and access control are verified using:
+![PC1 Internet Connectivity](screenshots/connectivity/PC1-internet-ping.png)
+
+![R1 NAT Translations](screenshots/nat/R1-nat-translations.png)
+
+<details>
+<summary>View additional connectivity evidence</summary>
+
+![PC2 Internet Connectivity](screenshots/connectivity/PC2-internet-ping.png)
+
+![PC3 Internet Connectivity](screenshots/connectivity/PC3-internet-ping.png)
+
+![PC4 Internet Connectivity](screenshots/connectivity/PC4-internet-ping.png)
+
+</details>
+
+### ACL and SSH Security
+
+ACL enforcement was verified through restricted inter-VLAN and infrastructure connectivity tests.
+
+The following traffic was successfully blocked:
+
+* USERS → GUEST
+* USERS → IT
+* GUEST → USERS
+* GUEST → IT
+* USERS → Management
+* GUEST → Management
+
+![PC1 to PC2 Blocked](screenshots/acl/PC1-to-PC2-blocked.png)
+
+![PC2 to PC1 Blocked](screenshots/acl/PC2-to-PC1-blocked.png)
+
+<details>
+<summary>View additional ACL test evidence</summary>
+
+![PC1 to PC4 Blocked](screenshots/acl/PC1-to-PC4-blocked.png)
+
+![PC2 to PC4 Blocked](screenshots/acl/PC2-to-PC4-blocked.png)
+
+![PC1 to Management Blocked](screenshots/acl/PC1-to-management-blocked.png)
+
+![PC2 to Management Blocked](screenshots/acl/PC2-to-management-blocked.png)
+
+</details>
+
+SSH access was also tested from different VLANs. Management access from the IT network was permitted, while access from the USERS network was blocked.
+
+![IT SSH Access Allowed](screenshots/ssh/PC4-ssh-allowed.png)
+
+![USERS SSH Access Blocked](screenshots/ssh/PC1-ssh-blocked.png)
+
+### Layer 2 Security
+
+The following Layer 2 security mechanisms were verified on ASW1 and ASW2:
 
 ```text
 show ip dhcp snooping
 show ip arp inspection
 show port-security
+show spanning-tree interface <interface> detail
 ```
 
-ACL behavior is verified by testing both permitted and restricted traffic between the VLANs.
+The verification confirmed:
 
-Screenshots and verification results can be added to the `screenshots/` directory as testing is documented.
+* DHCP Snooping enabled on VLANs 10, 20, 30, and 99
+* Trusted and untrusted DHCP Snooping interfaces correctly configured
+* Dynamic ARP Inspection active on VLANs 10, 20, and 30
+* Source MAC, destination MAC, and IP validation enabled
+* Port Security active on host-facing interfaces with one secure MAC address per port
+* No Port Security violations recorded
+* PortFast Edge enabled on host-facing interfaces
+* BPDU Guard enabled on host-facing interfaces
+
+![ASW1 DHCP Snooping](screenshots/layer2-security/ASW1-dhcp-snooping.png)
+
+![ASW1 DAI Status](screenshots/layer2-security/ASW1-dai-status.png)
+
+<details>
+<summary>View additional Layer 2 security evidence</summary>
+
+![ASW2 DHCP Snooping](screenshots/layer2-security/ASW2-dhcp-snooping.png)
+
+![ASW2 DAI Status](screenshots/layer2-security/ASW2-dai-status.png)
+
+![ASW1 Port Security](screenshots/layer2-security/ASW1-port-security.png)
+
+![ASW2 Port Security](screenshots/layer2-security/ASW2-port-security.png)
+
+![ASW1 PortFast and BPDU Guard](screenshots/layer2-security/ASW1-portfast-bpduguard.png)
+
+![ASW2 PortFast and BPDU Guard](screenshots/layer2-security/ASW2-portfast-bpduguard.png)
+
+</details>
+
+### Verification Evidence
+
+The complete verification evidence is organized in the [`screenshots/`](screenshots/) directory.
+
+The repository contains the full command outputs and test results for each verification category.
 
 ## Configuration Files
 
