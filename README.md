@@ -348,7 +348,7 @@ The complete configurations for the network devices are provided in the [`config
 
 These files contain the device configurations used to implement the network described in this documentation.
 
-## Lessons Learned
+## Key Takeaways
 
 This project provided practical experience in designing and implementing a redundant enterprise campus network in a virtualized environment.
 
