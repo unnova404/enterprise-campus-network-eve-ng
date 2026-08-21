@@ -1,0 +1,195 @@
+===== ASW2 CONFIGURATION =====
+
+Building configuration...
+
+Current configuration : 4762 bytes
+!
+! Last configuration change at 16:26:09 UTC Thu Aug 20 2026 by admin
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname ASW2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 9 $9$jxenqL/1lp.5of$KIkkQoJKUrIZ9fgHci.1qkFdeCoy6r3uQZfPiPnR/vQ
+!
+username admin secret 9 $9$oUMLrP1LDSCZJv$WDu86M24zaQZjdxeHbgpeHXMTSkYHF53YwRfCr/HV0o
+no aaa new-model
+!
+!
+!
+!
+!
+no ip routing
+ip arp inspection vlan 10,20,30
+ip arp inspection validate src-mac dst-mac ip
+!
+!
+!
+ip dhcp snooping vlan 10,20,30,99
+no ip dhcp snooping information option
+ip dhcp snooping
+ip domain-name cisco.lab
+no ip cef
+no ipv6 cef
+!
+!
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ ip arp inspection trust
+ negotiation auto
+ ip dhcp snooping trust
+!
+interface GigabitEthernet0/1
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ ip arp inspection trust
+ negotiation auto
+ ip dhcp snooping trust
+!
+interface GigabitEthernet0/2
+ switchport access vlan 10
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0050.0000.0800
+ switchport port-security
+ negotiation auto
+ spanning-tree portfast edge
+ spanning-tree bpduguard enable
+ ip dhcp snooping limit rate 10
+!
+interface GigabitEthernet0/3
+ switchport access vlan 30
+ switchport mode access
+ switchport nonegotiate
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ switchport port-security mac-address sticky 0050.0000.0700
+ switchport port-security
+ negotiation auto
+ spanning-tree portfast edge
+ spanning-tree bpduguard enable
+ ip dhcp snooping limit rate 10
+!
+interface GigabitEthernet1/0
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ shutdown
+ negotiation auto
+!
+interface Vlan99
+ ip address 10.0.2.22 255.255.255.240
+ no ip route-cache
+!
+ip default-gateway 10.0.2.17
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+ip ssh version 2
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+ip access-list standard SSH-IT
+ permit 10.0.30.0 0.0.0.255
+ deny   any
+!
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec ^C
+IOSv - Cisco Systems Confidential -
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+banner incoming ^C
+IOSv - Cisco Systems Confidential -
+
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+banner login ^C
+IOSv - Cisco Systems Confidential -
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+!
+line con 0
+ exec-timeout 30 0
+ logging synchronous
+ login local
+line aux 0
+line vty 0 4
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+line vty 5 15
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+!
+!
+end

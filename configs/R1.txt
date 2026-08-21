@@ -1,0 +1,199 @@
+===== R1 CONFIGURATION =====
+
+Building configuration...
+
+
+Current configuration : 4487 bytes
+!
+version 15.9
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 9 $9$r1fGnRbAEOZwTv$JPyb.7JwEL5tYbgLFFpBL5EVRqQDzvdw3sLWd1GmTFo
+!
+no aaa new-model
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+ip dhcp excluded-address 10.0.10.1 10.0.10.10
+ip dhcp excluded-address 10.0.20.1 10.0.20.10
+ip dhcp excluded-address 10.0.30.1 10.0.30.10
+!
+ip dhcp pool USERS
+ network 10.0.10.0 255.255.255.0
+ default-router 10.0.10.1
+ dns-server 192.168.160.2
+!
+ip dhcp pool GUEST
+ network 10.0.20.0 255.255.255.0
+ default-router 10.0.20.1
+ dns-server 192.168.160.2
+!
+ip dhcp pool IT
+ network 10.0.30.0 255.255.255.0
+ default-router 10.0.30.1
+ dns-server 192.168.160.2
+!
+!
+!
+ip domain name cisco.lab
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+username admin secret 9 $9$DQepBc1urYcMHv$cWzliLVko2PBmtRQMF7Sp0iQfWIl/l3y5frl5luldyo
+!
+redundancy
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.0.2.1 255.255.255.255
+!
+interface GigabitEthernet0/0
+ ip address 10.0.1.1 255.255.255.252
+ ip nat inside
+ ip virtual-reassembly in
+ ip ospf network point-to-point
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/1
+ ip address 10.0.1.5 255.255.255.252
+ ip nat inside
+ ip virtual-reassembly in
+ ip ospf network point-to-point
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/2
+ ip address dhcp
+ ip nat outside
+ ip virtual-reassembly in
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/3
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
+router ospf 1
+ router-id 10.0.2.1
+ passive-interface Loopback0
+ network 10.0.1.1 0.0.0.0 area 0
+ network 10.0.1.5 0.0.0.0 area 0
+ network 10.0.2.1 0.0.0.0 area 0
+ default-information originate
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip nat inside source list NAT-INSIDE interface GigabitEthernet0/2 overload
+ip ssh version 2
+!
+ip access-list standard NAT-INSIDE
+ permit 10.0.10.0 0.0.0.255
+ permit 10.0.20.0 0.0.0.255
+ permit 10.0.30.0 0.0.0.255
+ip access-list standard SSH-IT
+ permit 10.0.30.0 0.0.0.255
+ deny   any
+!
+ipv6 ioam timestamp
+!
+!
+!
+control-plane
+!
+banner exec ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner incoming ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+banner login ^C
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************^C
+!
+line con 0
+ exec-timeout 30 0
+ logging synchronous
+ login local
+line aux 0
+line vty 0 4
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+line vty 5 15
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+!
+no scheduler allocate
+!
+end

@@ -1,0 +1,242 @@
+===== DSW1 CONFIGURATION =====
+Building configuration...
+
+Current configuration : 6189 bytes
+!
+! Last configuration change at 16:10:44 UTC Thu Aug 20 2026
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+!
+hostname DSW1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 9 $9$cQmQphInzR42JP$vNValERRbruQ1T9qieqHsDbm3B.4wz.kk2dvIJmbffA
+!
+username admin secret 9 $9$xQIImnw9kY.Bif$9n2E7ZZtxrn0b0xWVh7jeLm8G87vMDIIWvjmDDEEZfY
+no aaa new-model
+!
+!
+!
+!
+!
+!
+!
+!
+ip domain-name cisco.lab
+ip cef
+no ipv6 cef
+!
+!
+port-channel load-balance src-ip
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+spanning-tree vlan 10,30 priority 4096
+spanning-tree vlan 20,99 priority 8192
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.0.2.4 255.255.255.255
+!
+interface Port-channel1
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ no switchport
+ ip address 10.0.1.14 255.255.255.252
+ ip ospf network point-to-point
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ ip address 10.0.1.18 255.255.255.252
+ ip ospf network point-to-point
+ negotiation auto
+!
+interface GigabitEthernet0/2
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet0/3
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ negotiation auto
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/1
+ switchport trunk allowed vlan 10,20,30,99
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 999
+ switchport mode trunk
+ negotiation auto
+ channel-group 1 mode active
+!
+interface GigabitEthernet1/2
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ shutdown
+ negotiation auto
+!
+interface Vlan10
+ ip address 10.0.10.2 255.255.255.0
+ ip access-group USERS-ACL in
+ ip helper-address 10.0.2.1
+ standby version 2
+ standby 10 ip 10.0.10.1
+ standby 10 priority 110
+ standby 10 preempt
+!
+interface Vlan20
+ ip address 10.0.20.2 255.255.255.0
+ ip access-group GUEST-ACL in
+ ip helper-address 10.0.2.1
+ standby version 2
+ standby 20 ip 10.0.20.1
+!
+interface Vlan30
+ ip address 10.0.30.2 255.255.255.0
+ ip helper-address 10.0.2.1
+ standby version 2
+ standby 30 ip 10.0.30.1
+ standby 30 priority 110
+ standby 30 preempt
+!
+interface Vlan99
+ ip address 10.0.2.18 255.255.255.240
+ standby version 2
+ standby 99 ip 10.0.2.17
+!
+router ospf 1
+ router-id 10.0.2.4
+ passive-interface Loopback0
+ passive-interface Vlan10
+ passive-interface Vlan20
+ passive-interface Vlan30
+ passive-interface Vlan99
+ network 10.0.1.14 0.0.0.0 area 0
+ network 10.0.1.18 0.0.0.0 area 0
+ network 10.0.2.4 0.0.0.0 area 0
+ network 10.0.2.18 0.0.0.0 area 0
+ network 10.0.10.2 0.0.0.0 area 0
+ network 10.0.20.2 0.0.0.0 area 0
+ network 10.0.30.2 0.0.0.0 area 0
+!
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+ip ssh version 2
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+ip access-list standard SSH-IT
+ permit 10.0.30.0 0.0.0.255
+ deny   any
+!
+ip access-list extended GUEST-ACL
+ permit udp 10.0.20.0 0.0.0.255 host 10.0.2.1 eq bootps
+ permit udp host 10.0.2.1 eq bootps 10.0.20.0 0.0.0.255 eq bootpc
+ deny   ip 10.0.20.0 0.0.0.255 10.0.10.0 0.0.0.255
+ deny   ip 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255
+ deny   ip 10.0.20.0 0.0.0.255 10.0.2.0 0.0.0.255
+ permit ip any any
+ip access-list extended USERS-ACL
+ permit udp 10.0.10.0 0.0.0.255 host 10.0.2.1 eq bootps
+ permit udp host 10.0.2.1 eq bootps 10.0.10.0 0.0.0.255 eq bootpc
+ deny   ip 10.0.10.0 0.0.0.255 10.0.20.0 0.0.0.255
+ deny   ip 10.0.10.0 0.0.0.255 10.0.30.0 0.0.0.255
+ deny   ip 10.0.10.0 0.0.0.255 10.0.2.0 0.0.0.255
+ permit ip any any
+!
+!
+!
+!
+!
+control-plane
+!
+banner exec ^C
+IOSv - Cisco Systems Confidential -
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+banner incoming ^C
+IOSv - Cisco Systems Confidential -
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+banner login ^C
+IOSv - Cisco Systems Confidential -
+
+Supplemental End User License Restrictions
+
+This IOSv software is provided AS-IS without warranty of any kind. Under no circumstances may this software be used separate from the Cisco Modeling Labs Software that this software was provided with, or deployed or used as part of a production environment.
+
+By using the software, you agree to abide by the terms and conditions of the Cisco End User License Agreement at http://www.cisco.com/go/eula. Unauthorized use or distribution of this software is expressly prohibited.
+^C
+!
+line con 0
+ exec-timeout 30 0
+ logging synchronous
+ login local
+line aux 0
+line vty 0 4
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+line vty 5 15
+ access-class SSH-IT in
+ exec-timeout 30 0
+ logging synchronous
+ login local
+ transport input ssh
+!
+!
+end
