@@ -21,7 +21,7 @@ The purpose of this project is to design and implement a redundant three-tier en
 
 The laboratory implements a redundant three-tier enterprise campus network in EVE-NG. The topology consists of an edge router, two core switches, two distribution switches, and two access switches connecting four end devices.
 
-![Network Topology](topology/network-topology.png)
+![Network Topology](topology/network_topology.png)
 
 ### Topology Overview
 
